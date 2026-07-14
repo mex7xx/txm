@@ -13,14 +13,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
         with:
-          targets: wasm32-unknown-unknown
+          target: wasm32-unknown-unknown
       - uses: jetli/wasm-pack-action@v0.4.0
+      - run: cargo test
+        working-directory: bindings/wasm
       - run: wasm-pack build bindings/wasm --target nodejs
-      - name: Smoke test
-        run: |
-          node -e "
-          const { render } = require('./bindings/wasm/pkg');
-          const out = render('E = mc^2');
-          if (!out.includes('mc')) { console.error(out); process.exit(1); }
-          console.log('OK');
-          "
