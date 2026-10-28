@@ -36,6 +36,12 @@
         white-space: pre-wrap;
       }
 
+      @media (prefers-color-scheme: dark) {
+        #error {
+          color: #ff8a80;
+        }
+      }
+
       #output {
         min-height: 2rem;
         padding: 1rem;
@@ -47,10 +53,6 @@
 
       .bold {
         font-weight: bold;
-      }
-
-      .dim {
-        opacity: 0.6;
       }
 
       .italic {
@@ -85,7 +87,7 @@
     <button id="render" type="button">Render</button>
 
     <p id="error" role="alert"></p>
-    <pre id="output"></pre>
+    <pre id="output" role="status" aria-live="polite"></pre>
 
     <script type="module" src="./main.js"></script>
   </body>

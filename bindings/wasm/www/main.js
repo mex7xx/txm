@@ -18,13 +18,14 @@ function escapeHtml(text) {
 
 function resetStyle(style) {
   style.bold = false;
-  style.dim = false;
   style.italic = false;
   style.underline = false;
 }
 
-// Apply the subset of SGR codes TXM emits. Unknown codes (including the
-// `38;5;n` / `48;5;n` color parameters) are stripped.
+// Apply the subset of SGR codes TXM emits: bold (1), italic (3),
+// underline (4), resets (0, 22, 23, 24), and extended colors, which are
+// stripped along with their parameters (`38;5;n`, `48;5;n`, `38;2;r;g;b`,
+// `48;2;r;g;b`).
 function applySgr(style, params) {
   const codes = params === '' ? [0] : params.split(';').map(Number);
 
@@ -36,9 +37,6 @@ function applySgr(style, params) {
       case 1:
         style.bold = true;
         break;
-      case 2:
-        style.dim = true;
-        break;
       case 3:
         style.italic = true;
         break;
@@ -47,7 +45,6 @@ function applySgr(style, params) {
         break;
       case 22:
         style.bold = false;
-        style.dim = false;
         break;
       case 23:
         style.italic = false;
@@ -57,9 +54,12 @@ function applySgr(style, params) {
         break;
       case 38:
       case 48:
-        // Extended color: `38;5;n` or `48;5;n`. Skip its arguments.
+        // Extended color: skip its parameters so the color numbers are not
+        // misread as style codes. `38;5;n` has two, `38;2;r;g;b` has four.
         if (codes[i + 1] === 5) {
           i += 2;
+        } else if (codes[i + 1] === 2) {
+          i += 4;
         }
         break;
       default:
@@ -71,7 +71,6 @@ function applySgr(style, params) {
 function styledHtml(text, style) {
   const classes = [];
   if (style.bold) classes.push('bold');
-  if (style.dim) classes.push('dim');
   if (style.italic) classes.push('italic');
   if (style.underline) classes.push('underline');
 
@@ -83,7 +82,7 @@ function styledHtml(text, style) {
 
 // Convert TXM's ANSI SGR output to HTML, one styled span per run of text.
 function ansiToHtml(ansi) {
-  const style = { bold: false, dim: false, italic: false, underline: false };
+  const style = { bold: false, italic: false, underline: false };
   const parts = [];
   const sgr = /\x1b\[([0-9;]*)m/g;
   let lastIndex = 0;
