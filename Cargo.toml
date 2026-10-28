@@ -1,6 +1,6 @@
 [package]
 name = "txm"
-version = "0.1.4"
+version = "0.1.6"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Terminal math rendering engine"
@@ -14,9 +14,7 @@ thiserror = "2"
 unicode-width = "0.2"
 
 ratatui-core = { version = "0.1", optional = true }
-yansi = { version = "1.0.1", optional = true }
 
 [features]
 default = []
-fancy = ["dep:yansi"]
 ratatui = ["dep:ratatui-core"]

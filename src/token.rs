@@ -56,6 +56,23 @@ pub enum Token<'a> {
     #[token("&")]
     Ampersand,
 
+    #[token("?")]
+    Question,
+    #[token("@")]
+    At,
+    #[token("#")]
+    Hash,
+    #[token("$")]
+    Dollar,
+    #[token("%")]
+    Percent,
+    #[token("~")]
+    Tilde,
+    #[token("\"")]
+    Quote,
+    #[token("`")]
+    Backtick,
+
     #[regex(r"\\[a-zA-Z]+", |lex| &lex.slice()[1..])]
     Command(&'a str),
 
@@ -73,12 +90,67 @@ pub enum Token<'a> {
     Whitespace,
 }
 
+impl<'a> Token<'a> {
+    pub fn text_char(&self) -> Option<char> {
+        match self {
+            Token::Bang => Some('!'),
+            Token::Question => Some('?'),
+            Token::Comma => Some(','),
+            Token::Dot => Some('.'),
+            Token::Colon => Some(':'),
+            Token::Semicolon => Some(';'),
+            Token::Slash => Some('/'),
+            Token::Less => Some('<'),
+            Token::Greater => Some('>'),
+            Token::Plus => Some('+'),
+            Token::Minus => Some('-'),
+            Token::Equals => Some('='),
+            Token::Star => Some('*'),
+            Token::Pipe => Some('|'),
+            Token::Ampersand => Some('&'),
+            Token::LParen => Some('('),
+            Token::RParen => Some(')'),
+            Token::LBracket => Some('['),
+            Token::RBracket => Some(']'),
+            Token::LBrace => Some('{'),
+            Token::RBrace => Some('}'),
+            Token::Prime => Some('\''),
+            Token::Caret => Some('^'),
+            Token::Underscore => Some('_'),
+            Token::At => Some('@'),
+            Token::Hash => Some('#'),
+            Token::Dollar => Some('$'),
+            Token::Percent => Some('%'),
+            Token::Tilde => Some('~'),
+            Token::Quote => Some('"'),
+            Token::Backtick => Some('`'),
+            Token::Ident(s) => s.chars().next(),
+            Token::Number(s) if s.len() == 1 => s.chars().next(),
+            Token::Escape(s) => s.chars().next(),
+            _ => None,
+        }
+    }
+
+    pub fn as_char(&self) -> Option<char> {
+        match self {
+            Token::LParen | Token::Escape("(") => Some('('),
+            Token::RParen | Token::Escape(")") => Some(')'),
+            Token::LBracket | Token::Escape("[") => Some('['),
+            Token::RBracket | Token::Escape("]") => Some(']'),
+            Token::LBrace | Token::Escape("{") => Some('{'),
+            Token::RBrace | Token::Escape("}") => Some('}'),
+            Token::Pipe | Token::Escape("|") => Some('|'),
+            _ => None,
+        }
+    }
+}
+
 pub fn tokenize(input: &str) -> Result<Vec<SpannedToken<'_>>, ParseError> {
     Token::lexer(input)
         .spanned()
         .map(|(i, span)| {
             i.map(|i| (i, span.clone()))
-                .map_err(|_| ParseError::from_range(span))
+                .map_err(|_| ParseError::InvalidToken { byte: span.start })
         })
         .collect()
 }

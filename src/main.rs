@@ -37,20 +37,22 @@ fn main() {
         },
     ];
 
-    let program: String = env::args().next().unwrap_or_default();
+    let program =
+        std::fs::canonicalize(std::env::args().next().unwrap_or_default()).unwrap_or_default();
+    let program = program
+        .strip_prefix(std::env::current_dir().unwrap_or_default())
+        .unwrap_or(std::path::Path::new(""));
+    let program = program.to_str().unwrap_or_default();
 
     match parse_args() {
-        Ok(Cli::Help) => print!("{}", help(&program, &flags)),
+        Ok(Cli::Help) => print!("{}", help(program, &flags)),
         Ok(Cli::Version) => println!("txm {}", env!("CARGO_PKG_VERSION")),
         Ok(Cli::Run(config)) => match txm::render(&config.expression) {
             Ok(rendered) => {
                 if config.unboxed {
                     print!("{rendered}");
                 } else {
-                    cfg_select! {
-                        feature = "fancy" => println!("{rendered}"),
-                        _  => boxed(&rendered, &mut std::io::stdout()),
-                    }
+                    boxed(&rendered, &mut std::io::stdout());
                 }
             }
             Err(e) => {
@@ -58,7 +60,7 @@ fn main() {
                 std::process::exit(1);
             }
         },
-        Err(msg) if msg == "missing expression" => print!("{}", help(&program, &flags)),
+        Err(msg) if msg == "missing expression" => print!("{}", help(program, &flags)),
         Err(msg) => {
             eprintln!("error: {msg}");
             eprintln!("\nFor more information, try '--help'.");
@@ -78,7 +80,6 @@ fn parse_args() -> Result<Cli, String> {
             "--version" => return Ok(Cli::Version),
             "--unboxed" => unboxed = true,
             "--file" => {
-                // grab the next token for the file path
                 let path_arg = args
                     .next()
                     .ok_or_else(|| "missing file path after '--file'".to_string())?;
@@ -140,24 +141,45 @@ EXAMPLES:
 }
 
 #[allow(unused)]
+fn strip_ansi(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        if c == '\x1b' {
+            // Skip until 'm' (SGR sequence end)
+            for c in chars.by_ref() {
+                if c == 'm' {
+                    break;
+                }
+            }
+        } else {
+            result.push(c);
+        }
+    }
+
+    result
+}
+
+#[allow(unused)]
 fn boxed(rendered: &str, f: &mut impl std::io::Write) {
     let lines: Vec<&str> = rendered.lines().collect();
     let width = lines
         .iter()
-        .map(|line| line.width()) // Use the extension trait method directly
+        .map(|line| strip_ansi(line).width())
         .max()
         .unwrap_or(0);
 
     let border = "─".repeat(width + 2);
 
-    let _ = writeln!(f, "┌{border}┐");
-    let _ = writeln!(f, "│ {:width$} │", "", width = width);
+    _ = writeln!(f, "┌{border}┐");
+    _ = writeln!(f, "│ {:width$} │", "", width = width);
 
     for line in lines {
-        let padding = width - line.width();
-        let _ = writeln!(f, "│ {line}{:padding$} │", "", padding = padding);
+        let visible = strip_ansi(line);
+        let padding = width - visible.width();
+        _ = writeln!(f, "│ {line}{:padding$} │", "", padding = padding);
     }
 
-    let _ = writeln!(f, "│ {:width$} │", "", width = width);
-    let _ = writeln!(f, "└{border}┘");
+    _ = writeln!(f, "│ {:width$} │", "", width = width);
+    _ = writeln!(f, "└{border}┘");
 }
