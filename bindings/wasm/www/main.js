@@ -115,4 +115,9 @@ function draw() {
 document.getElementById('render').addEventListener('click', draw);
 
 await init();
+
+// The module loaded, so the page is being served over HTTP. The note only
+// matters when loading fails, which is why it lives in the HTML instead of
+// being rendered from JavaScript.
+document.getElementById('http-note').hidden = true;
 draw();
