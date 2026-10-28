@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TXM.wasm demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
+
+      body {
+        max-width: 52rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 6rem;
+        padding: 0.5rem;
+        font: inherit;
+        font-family: ui-monospace, monospace;
+      }
+
+      button {
+        margin-top: 0.5rem;
+        padding: 0.4rem 1rem;
+        font: inherit;
+      }
+
+      #error {
+        color: #b00020;
+        white-space: pre-wrap;
+      }
+
+      #output {
+        min-height: 2rem;
+        padding: 1rem;
+        border: 1px solid #8884;
+        border-radius: 0.25rem;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+
+      .dim {
+        opacity: 0.6;
+      }
+
+      .italic {
+        font-style: italic;
+      }
+
+      .underline {
+        text-decoration: underline;
+      }
+
+      .note {
+        padding: 0.75rem 1rem;
+        border-left: 4px solid #e0a000;
+        background: #e0a0001a;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TXM.wasm</h1>
+    <p>Render LaTeX math to ANSI-styled Unicode art, entirely in the browser.</p>
+
+    <p class="note">
+      This demo must be served over HTTP, not opened as a
+      <code>file://</code> URL, because browsers block ES module and WASM
+      loading from local files. Run
+      <code>python3 -m http.server -d www</code> from
+      <code>bindings/wasm</code> and open the printed address.
+    </p>
+
+    <label for="input">LaTeX</label>
+    <textarea id="input" spellcheck="false">E = mc^2</textarea>
+    <button id="render" type="button">Render</button>
+
+    <p id="error" role="alert"></p>
+    <pre id="output"></pre>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

@@ -54,6 +54,12 @@ impl CharBuf {
 
 impl fmt::Display for CharBuf {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // `chunks_exact` panics on a zero chunk size, which happens for empty
+        // input (zero-width output). There is nothing to draw in that case.
+        if self.width == 0 || self.height == 0 {
+            return Ok(());
+        }
+
         let style_rows = self.styles.chunks_exact(self.width).take(self.height);
         let data_rows = self.data.chunks_exact(self.width).take(self.height);
 

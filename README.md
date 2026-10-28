@@ -48,6 +48,7 @@ $ cargo install --git https://github.com/thatmagicalcat/txm
 ### Bindings
 - C/C++ bindings live in [`bindings/c/`](./bindings/c/).
 - Python bindings live in [`bindings/py/`](./bindings/py/).
+- WebAssembly/JavaScript bindings live in [`bindings/wasm/`](./bindings/wasm/).
 
 # Projects using TXM:
 - [**txm.nvim**](https://github.com/rv178/txm.nvim/): LaTeX preview inside NeoVim using

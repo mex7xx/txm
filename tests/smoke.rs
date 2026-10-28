@@ -82,6 +82,15 @@ fn braces_group_invisibly() {
 }
 
 #[test]
+fn render_empty_and_whitespace_do_not_panic() {
+    for input in ["", " ", "{}"] {
+        let rendered = txm::render(input)
+            .unwrap_or_else(|e| panic!("render({input:?}) should succeed, got {e}"));
+        assert_eq!(rendered, "", "render({input:?}) should produce no output");
+    }
+}
+
+#[test]
 fn render_returns_error_for_invalid_lexer_input() {
     assert!(txm::render("\\").is_err());
 }

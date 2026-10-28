@@ -28,9 +28,14 @@ jobs:
         run: cargo test
         working-directory: bindings/wasm
       - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: v0.15.0
       - name: Build WASM
         run: wasm-pack build . --target nodejs
         working-directory: bindings/wasm
       - name: Smoke test (Node)
         run: node tests/smoke.mjs
+        working-directory: bindings/wasm
+      - name: Build WASM (web)
+        run: wasm-pack build . --target web --out-dir pkg-web
         working-directory: bindings/wasm
