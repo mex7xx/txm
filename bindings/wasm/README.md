@@ -49,6 +49,8 @@ python3 -m http.server -d www
 Open the printed address (for example <http://localhost:8000/>) and enter
 LaTeX in the textarea.
 
+![The demo page rendering an integral, with the LaTeX input above the rendered output](./demo.png)
+
 > The page must be served over HTTP, not opened as a `file://` URL: browsers
 > block ES module imports and WASM fetches from local files.
 
