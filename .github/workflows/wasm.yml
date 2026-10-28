@@ -6,15 +6,31 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  build:
+  wasm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
         with:
+          components: clippy, rustfmt
           target: wasm32-unknown-unknown
-      - uses: jetli/wasm-pack-action@v0.4.0
-      - run: cargo test
+      - name: Format
+        run: cargo fmt --check
         working-directory: bindings/wasm
-      - run: wasm-pack build bindings/wasm --target nodejs
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+        working-directory: bindings/wasm
+      - name: Test (native)
+        run: cargo test
+        working-directory: bindings/wasm
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build WASM
+        run: wasm-pack build . --target nodejs
+        working-directory: bindings/wasm
+      - name: Smoke test (Node)
+        run: node tests/smoke.mjs
+        working-directory: bindings/wasm
